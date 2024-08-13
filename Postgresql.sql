@@ -191,3 +191,86 @@ where price not between 10000 and 20000;
 select *
 from products
 where category in ('Makanan', 'Minuman');
+
+select *
+from products
+order by price asc, id desc;
+
+select *
+from products
+where price > 0
+order by price asc, id desc;
+
+select *
+from products
+where price > 0
+order by price asc, id desc
+limit 2;
+
+-- ini untuk membuat paging
+-- 1 limit 2 offset 0, 2 limit 2 offset 2, 3 limit 2 offset 4
+
+select *
+from products
+where price > 0
+order by price asc, id desc
+limit 2 offset 2;
+
+select category
+from products;
+
+select distinct category
+from products;
+
+select 10 + 10 as hasil;
+
+select id, name, price / 1000 as price_in_k
+from products;
+
+select pi();
+
+select power(10, 2);
+
+select cos(10), sin(10), tan(10);
+
+select id, name, power(quantity, 2) as quantity_power_2
+from products;
+
+create table admin
+(
+    id         serial       not null,
+    first_name varchar(100) not null,
+    last_name  varchar(100),
+    primary key (id)
+);
+
+insert into admin(first_name, last_name)
+values ('Aidil', 'Adam'),
+       ('Budi', 'Nugraha'),
+       ('Joko', 'Morro');
+
+select *
+from admin;
+
+select currval('admin_id_seq');
+
+create sequence contoh_sequence;
+
+select nextval('contoh_sequence');
+
+select currval('contoh_sequence');
+
+select id, name, description
+from products;
+
+select id, lower(name), length(name), lower(description)
+from products;
+
+select *
+from products;
+
+select id, extract(year from created_at), extract(month from created_at)
+from products;
+
+select id, category
+from products;
