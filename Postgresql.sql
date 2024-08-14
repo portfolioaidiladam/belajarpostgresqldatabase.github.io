@@ -274,3 +274,318 @@ from products;
 
 select id, category
 from products;
+
+select id,
+       category,
+       case category
+           when 'Makanan' then 'Enak'
+           when 'Minuman' then 'Seger'
+           else 'Apa itu?'
+           end as category_case
+from products;
+
+select id,
+       price,
+       case
+           when price <= 15000 then 'Murah'
+           when price <= 20000 then 'Mahal'
+           else 'Mahal Banget'
+           end as "apakah murah?"
+from products;
+
+select id,
+       name,
+       case
+           when description is null then 'kosong'
+           else description
+           end as description
+from products;
+
+select count(id)
+from products;
+
+select avg(price)
+from products;
+
+select max(price)
+from products;
+
+select min(price)
+from products;
+
+select category, count(id) as "Total Product"
+from products
+group by category;
+
+select category,
+       avg(price) as "Rata Rata Harga",
+       min(price) as "Harga termurah",
+       max(price) as "Harga termahal"
+from products
+group by category;
+
+select category, count(id) as "Total Product"
+from products
+group by category
+having count(id) > 3;
+
+select category,
+       avg(price) as "Rata Rata Harga",
+       min(price) as "Harga termurah",
+       max(price) as "Harga termahal"
+from products
+group by category
+having avg(price) >= 20000;
+
+<!-- contraint -->
+create table customer
+(
+    id         serial       not null,
+    email      varchar(100) not null,
+    first_name varchar(100) not null,
+    last_name  varchar(100),
+    primary key (id),
+    constraint unique_email unique (email)
+);
+
+select *
+from customer;
+
+insert into customer(email, first_name, last_name)
+values ('aidil@pzn.com', 'Aidil', 'Adam');
+
+insert into customer(email, first_name, last_name)
+values ('budi@pzn.com', 'Budi', 'Nugraha'),
+       ('joko@pzn.com', 'Joko', 'Morro'),
+       ('rully@pzn.com', 'Rully', 'Irwansyah');
+       
+alter table customer
+    drop constraint unique_email;
+
+alter table customer
+    add constraint unique_email unique (email);
+
+alter table products
+    add constraint price_check check ( price > 1000 );
+
+alter table products
+    add constraint quantity_check check ( quantity >= 0 ); 
+   
+insert into products(id, name, price, quantity, category)
+values ('XXX1', 'Contoh Gagal', 10, 0, 'Minuman');
+
+insert into products(id, name, price, quantity, category)
+values ('XXX1', 'Contoh Gagal', 10000, -10, 'Minuman');   
+    
+select *
+from products;   
+
+create table sellers
+(
+    id    serial       not null,
+    name  varchar(100) not null,
+    email varchar(100) not null,
+    primary key (id),
+    constraint email_unique unique (email)
+);
+
+insert into sellers (name, email)
+values ('Galeri Olahraga', 'galeri@pzn.com'),
+       ('Toko Tono', 'tono@pzn.com'),
+       ('Toko Budi', 'budi@pzn.com'),
+       ('Toko Rully', 'rully@pzn.com');
+
+SELECT *
+From sellers;
+
+create index sellers_id_and_name_index ON sellers (id, name);
+create index sellers_email_and_name_index ON sellers (email, name);
+create index sellers_name_index ON sellers (name);
+
+select *
+from sellers 
+where id = 1;
+
+select *
+from sellers
+where id = 1
+   or name = 'Toko Tono';
+
+  select *
+from sellers
+where email = 'rully@pzn.com'
+   or name = 'Toko Tono';
+
+select *
+from sellers
+where name = 'Toko Tono';
+
+select *
+from products
+where name ilike '%mie%';
+
+<!-- fulltext search -->
+
+select *
+from products
+where to_tsvector(name) @@ to_tsquery('mie');
+
+select cfgname
+from pg_ts_config;
+
+create index products_name_search on products using gin (to_tsvector('indonesian', name));
+create index products_description_search on products using gin (to_tsvector('indonesian', description));
+
+select *
+from products
+where name @@ to_tsquery('ayam & tahu');
+
+select *
+from products
+where name @@ to_tsquery('''mie ayam''');
+
+select *
+from products
+where description @@ to_tsquery('mie');
+
+create table wishlist
+(
+    id          serial      not null,
+    id_product  varchar(10) not null,
+    description text,
+    primary key (id),
+    constraint fk_wishlist_product foreign key (id_product) references products (id)
+);
+
+insert into wishlist (id_product, description)
+values ('P0001', 'Mie ayam kesukaan'),
+       ('P0002', 'Mie ayam kesukaan'),
+       ('P0005', 'Mie ayam kesukaan');
+
+SELECT *
+FROM wishlist ;
+
+delete
+from products
+where id = 'P0005';
+
+alter table wishlist
+    drop constraint fk_wishlist_product;
+
+alter table wishlist
+    add constraint fk_wishlist_product foreign key (id_product) references products (id)
+        on delete cascade on update cascade;
+       
+insert into products(id, name, price, quantity, category)
+values ('XXX', 'Xxx', 10000, 100, 'Minuman');
+
+SELECT *
+FROM products;
+
+insert into wishlist(id_product, description)
+values ('XXX', 'Contoh');
+
+select *
+from wishlist;
+
+delete
+from products
+where id = 'XXX'; 
+
+select *
+from wishlist
+         join products on wishlist.id_product = products.id;
+
+select p.id, p.name, w.description
+from wishlist as w
+         join products as p on w.id_product = p.id;
+
+alter table wishlist
+    add column id_customer int;
+
+alter table wishlist
+    add constraint fk_wishlist_customer foreign key (id_customer) references customer (id);
+
+update wishlist
+set id_customer = 1
+where id in (2, 3);
+
+update wishlist
+set id_customer = 4
+where id = 4;
+
+select *
+From customer;
+
+select *
+from wishlist;
+
+select c.email, p.id, p.name, w.description
+from wishlist as w
+         join products as p on w.id_product = p.id
+         join customer as c on c.id = w.id_customer;
+
+create table wallet
+(
+    id          serial not null,
+    id_customer int    not null,
+    balance     int    not null default 0,
+    primary key (id),
+    constraint wallet_customer_unique unique (id_customer),
+    constraint fk_wallet_customer foreign key (id_customer) references customer (id)
+);
+
+select *
+from customer;
+
+insert into wallet(id_customer, balance)
+values (1, 1000000),
+       (4, 2000000),
+       (5, 3000000),
+       (6, 4000000);
+      
+select *
+from wallet;      
+
+select *
+from customer
+         join wallet on wallet.id_customer = customer.id;
+        
+create table categories
+(
+    id   varchar(10)  not null,
+    name varchar(100) not null,
+    primary key (id)
+);
+
+insert into categories(id, name)
+values ('C0001', 'Makanan'),
+       ('C0002', 'Minuman');
+
+select *
+from categories;
+
+alter table products
+    add column id_category varchar(10);
+
+alter table products
+    add constraint fk_product_category foreign key (id_category) references categories (id);
+
+select *
+from products;
+
+update products
+set id_category = 'C0001'
+where category = 'Makanan';
+
+update products
+set id_category = 'C0002'
+where category = 'Minuman';
+
+alter table products
+    drop column category;
+
+select *
+from products
+         join categories on products.id_category = categories.id;
+        
