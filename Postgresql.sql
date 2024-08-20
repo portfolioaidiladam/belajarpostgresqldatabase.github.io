@@ -589,3 +589,212 @@ select *
 from products
          join categories on products.id_category = categories.id;
         
+create table orders
+(
+    id         serial    not null,
+    total      int       not null,
+    order_date timestamp not null default current_timestamp,
+    primary key (id)
+);
+
+create table orders_detail
+(
+    id_product varchar(10) not null,
+    id_order   int         not null,
+    price      int         not null,
+    quantity   int         not null,
+    primary key (id_product, id_order)
+);
+
+alter table orders_detail
+    add constraint fk_orders_detail_product foreign key (id_product) references products (id);
+
+alter table orders_detail
+    add constraint fk_orders_detail_order foreign key (id_order) references orders (id);
+
+insert into orders(total)
+values (1),
+       (1),
+       (1);   
+
+select *
+from orders;      
+        
+select *
+from products
+order by id;
+
+insert into orders_detail (id_product, id_order, price, quantity)
+values ('P0001', 1, 1000, 2),
+       ('P0002', 1, 1000, 2),
+       ('P0003', 1, 1000, 2);
+      
+insert into orders_detail (id_product, id_order, price, quantity)
+values ('P0004', 2, 1000, 2),
+       ('P0006', 2, 1000, 2),
+       ('P0007', 2, 1000, 2);
+
+insert into orders_detail (id_product, id_order, price, quantity)
+values ('P0001', 3, 1000, 2),
+       ('P0004', 3, 1000, 2),
+       ('P0005', 3, 1000, 2);      
+     
+select *
+from orders_detail;
+
+select *
+from orders
+         join orders_detail on orders_detail.id_order = orders.id
+         join products on orders_detail.id_product = products.id;
+        
+select *
+from orders
+         join orders_detail on orders_detail.id_order = orders.id
+         join products on orders_detail.id_product = products.id
+where orders.id = 3;
+
+insert into categories (id, name)
+VALUES ('C0003', 'Gadget'),
+       ('C0004', 'Laptop'),
+       ('C0005', 'Pulsa');
+
+select *
+from categories;
+
+select *
+from products;
+
+insert into products(id, name, price, quantity)
+values ('X0001', 'Contoh 1', 10000, 100),
+       ('X0002', 'Contoh 2', 10000, 100);
+
+select *
+from categories
+         inner join products on products.id_category = categories.id;
+
+select *
+from categories
+         left join products on products.id_category = categories.id;
+
+select *
+from categories
+         right join products on products.id_category = categories.id;
+
+select *
+from categories
+         full join products on products.id_category = categories.id;
+        
+select avg(price)
+from products;
+
+select *
+from products
+where price > (select avg(price) from products);
+
+select *
+from products;
+
+select max(price)
+from (select products.price as price
+      from categories
+               join products on products.id_category = categories.id) as contoh;
+        
+create table guestbooks
+(
+    id      serial       not null,
+    email   varchar(100) not null,
+    title   varchar(100) not null,
+    content text,
+    primary key (id)
+);
+
+select *
+from customer;
+
+insert into guestbooks(email, title, content)
+values ('aidil@pzn.com', 'feedback aidil', 'ini feedback aidil'),
+       ('aidil@pzn.com', 'feedback aidil', 'ini feedback aidil'),
+       ('budi@pzn.com', 'feedback budi', 'ini feedback budi'),
+       ('rully@pzn.com', 'feedback rully', 'ini feedback rully'),
+       ('tono@pzn.com', 'feedback tono', 'ini feedback tono'),
+       ('tono@pzn.com', 'feedback tono', 'ini feedback tono');
+
+select *
+from guestbooks;
+
+select distinct email
+from customer
+union
+select distinct email
+from guestbooks;
+
+select email
+from customer
+union all
+select email
+from guestbooks;
+
+select email, count(email)
+from (select email
+      from customer
+      union all
+      select email
+      from guestbooks) as contoh
+group by email;
+
+select email
+from customer
+intersect
+select email
+from guestbooks;
+
+select email
+from customer
+except
+select email
+from guestbooks;
+
+start transaction;
+
+insert into guestbooks(email, title, content)
+values ('transaction@pzn.com', 'transaction', 'transaction');
+
+insert into guestbooks(email, title, content)
+values ('transaction@pzn.com', 'transaction', 'transaction 2');
+
+insert into guestbooks(email, title, content)
+values ('transaction@pzn.com', 'transaction', 'transaction 3');
+
+insert into guestbooks(email, title, content)
+values ('transaction@pzn.com', 'transaction', 'transaction 4');
+
+insert into guestbooks(email, title, content)
+values ('transaction@pzn.com', 'transaction', 'transaction 5');
+
+select *
+from guestbooks;
+
+commit;
+
+
+start transaction;
+
+insert into guestbooks(email, title, content)
+values ('transaction@pzn.com', 'transaction', 'rollback');
+
+insert into guestbooks(email, title, content)
+values ('transaction@pzn.com', 'transaction', 'rollback 2');
+
+insert into guestbooks(email, title, content)
+values ('transaction@pzn.com', 'transaction', 'rollback 3');
+
+insert into guestbooks(email, title, content)
+values ('transaction@pzn.com', 'transaction', 'rollback 4');
+
+insert into guestbooks(email, title, content)
+values ('transaction@pzn.com', 'transaction', 'rollback 5');
+
+select *
+from guestbooks;
+
+rollback;
