@@ -798,3 +798,95 @@ select *
 from guestbooks;
 
 rollback;
+
+select *
+from products;
+
+start transaction;
+
+update products
+set description = 'Mie ayam original enak'
+where id = 'P0001';
+
+select *
+from products
+where id = 'P0001';
+
+commit;
+
+start transaction;
+
+<-- kalau mau lock manual-->
+select *
+from products
+where id = 'P0001' for update;
+
+rollback;
+
+select *
+from products
+where id = 'P0001';
+
+start transaction;
+<-- kalau mau deadlock, lakukan rollback untuk membalikkan-->
+select *
+from products
+where id = 'P0001' for update;
+
+select *
+from products
+where id = 'P0002' for update;
+
+rollback;
+
+select current_schema();
+
+create schema contoh;
+
+drop schema contoh;
+
+SET search_path TO public;
+
+select current_schema();
+
+select *
+from public.products;
+
+create table contoh.products
+(
+    id   serial       not null,
+    name varchar(100) not null,
+    primary key (id)
+);
+
+select * from contoh.products;
+
+SET search_path TO public;
+
+insert into contoh.products(name)
+values ('iphone'),
+       ('Play Station');
+
+select * from contoh.products;
+
+create role aidil;
+create role budi;
+
+drop role aidil;
+drop role budi;
+rollback;
+
+alter role aidil login password 'rahasia';
+
+alter role budi login password 'rahasia';
+
+grant insert, update, select on all tables in schema public to aidil;
+grant usage, select, update ON guestbooks_id_seq TO aidil;
+grant insert, update, select on customer to budi;
+
+<!-- lakukan login di psqlnya dengan user aidil-->
+delete from products where id ='P0002';
+
+
+create database belajar_restore;
+
